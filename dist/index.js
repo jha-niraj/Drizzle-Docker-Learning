@@ -15,8 +15,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 require("dotenv/config");
 const node_postgres_1 = require("drizzle-orm/node-postgres");
+const drizzle_orm_1 = require("drizzle-orm");
 const schema_1 = require("./db/schema");
 const db = (0, node_postgres_1.drizzle)(process.env.DATABASE_URL);
+function testConnection() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield db.execute((0, drizzle_orm_1.sql) `SELECT 1`);
+            console.log("✅ Database connected successfully!");
+        }
+        catch (err) {
+            console.error("❌ Database connection failed:", err);
+        }
+    });
+}
+testConnection();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.get("/", (req, res) => {

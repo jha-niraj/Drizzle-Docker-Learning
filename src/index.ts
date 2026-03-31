@@ -1,9 +1,20 @@
 import express from "express"
 import "dotenv/config"
 import { drizzle } from "drizzle-orm/node-postgres";
+import { sql } from "drizzle-orm";
 import { users } from "./db/schema";
     
 const db = drizzle(process.env.DATABASE_URL!);
+
+async function testConnection() {
+    try {
+        await db.execute(sql`SELECT 1`);
+        console.log("✅ Database connected successfully!");
+    } catch (err) {
+        console.error("❌ Database connection failed:", err);
+    }
+}
+testConnection();
 
 const app = express();
 app.use(express.json());    
