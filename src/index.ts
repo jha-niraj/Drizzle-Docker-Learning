@@ -1,3 +1,75 @@
+import express from "express"
+import "dotenv/config"
+import { drizzle } from "drizzle-orm/node-postgres";
+import { users } from "./db/schema";
+    
+const db = drizzle(process.env.DATABASE_URL!);
+
+const app = express();
+app.use(express.json());    
+
+app.get("/", (req, res) => {
+    res.send("Healthy!!!");
+})
+
+app.post("/createuser", async (req, res) => { 
+    try {
+        const { name, email, age } = req.body;
+        
+        if(!name || !email || !age) {
+            return res.json({
+                success: false,
+                msg: "Invalid data!!!"
+            })
+        }
+        
+        const newUser = await db.insert(users).values({
+            name,
+            email,
+            age
+        })
+        
+        if(!newUser) {
+            return {
+                success: false,
+                msg: "Failed to create new user!!!"
+            }
+        }
+        
+        return res.json({
+            success: true,
+            msg: "Successfully created a user!!!"
+        })
+    } catch(err) {
+        console.log("Error occurred while getting the users: " + err);
+    }
+})
+
+app.get("/users", async (req, res) => {
+    try {
+        const fetchedUsers = await db.select().from(users);
+        
+        if(!fetchedUsers) {
+            return {
+                success: false,
+                msg: "Failed to get the users!!!"
+            }
+        }
+        
+        return res.json({
+            success: true,
+            msg: "Successfully fetched all users!!!",
+            users: fetchedUsers
+        })
+    } catch(err) {
+        console.log("Error occurred while getting the users: " + err);
+    }
+})
+
+app.listen(3004, () => {
+    console.log("Server is running on port 3004!!!");
+})
+
 // import express from "express";
 //     
 // const app = express();
@@ -50,15 +122,3 @@
 // }
 
 // main();
-
-import express from "express"
-
-const app = express();
-    
-app.get("/", (req, res) => {
-    res.send("Healthy!!!");
-})
-
-app.listen(3004, () => {
-    console.log("Server is running on port 3004!!!");
-})
