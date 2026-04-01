@@ -1,7 +1,7 @@
 import express from "express"
 import "dotenv/config"
 import { drizzle } from "drizzle-orm/node-postgres";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 import { users } from "./db/schema";
     
 const db = drizzle(process.env.DATABASE_URL!);
@@ -34,6 +34,16 @@ app.post("/createuser", async (req, res) => {
             })
         }
         
+        const existingUser = await db.select().from(users).where(eq(users.email, email));
+        console.log(existingUser);
+        
+        if(existingUser.length > 0) {
+            return res.json({
+                success: false,
+                msg: "Found another user with same email!!!"
+            })
+        }
+        
         const newUser = await db.insert(users).values({
             name,
             email,
@@ -52,7 +62,11 @@ app.post("/createuser", async (req, res) => {
             msg: "Successfully created a user!!!"
         })
     } catch(err) {
-        console.log("Error occurred while getting the users: " + err);
+        console.log("Error occurred while creating user: " + err);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal server error"
+        })
     }
 })
 

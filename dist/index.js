@@ -44,6 +44,14 @@ app.post("/createuser", (req, res) => __awaiter(void 0, void 0, void 0, function
                 msg: "Invalid data!!!"
             });
         }
+        const existingUser = yield db.select().from(schema_1.users).where((0, drizzle_orm_1.eq)(schema_1.users.email, email));
+        console.log(existingUser);
+        if (existingUser.length > 0) {
+            return res.json({
+                success: false,
+                msg: "Found another user with same email!!!"
+            });
+        }
         const newUser = yield db.insert(schema_1.users).values({
             name,
             email,
@@ -61,7 +69,11 @@ app.post("/createuser", (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
     catch (err) {
-        console.log("Error occurred while getting the users: " + err);
+        console.log("Error occurred while creating user: " + err);
+        return res.status(500).json({
+            success: false,
+            msg: "Internal server error"
+        });
     }
 }));
 app.get("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
