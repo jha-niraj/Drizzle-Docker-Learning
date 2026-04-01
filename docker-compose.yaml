@@ -1,0 +1,23 @@
+services:
+  postgresdb:
+    image: postgres
+    container_name: postgresdb
+    environment:
+      - POSTGRES_PASSWORD=nirajjha
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
+
+  blogproject:
+    build: .
+    container_name: blogserver
+    ports:
+      - "3004:3004"
+    environment:
+      - DATABASE_URL=postgres://postgres:nirajjha@postgresdb:5432/postgres
+    depends_on:
+      - postgresdb
+
+volumes:
+  postgresdb:
